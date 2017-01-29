@@ -1,6 +1,8 @@
+$LOAD_PATH.unshift(File.dirname(__FILE__)) unless
+    $LOAD_PATH.include?(File.dirname(__FILE__)) || $LOAD_PATH.include?(File.expand_path(File.dirname(__FILE__)))
 require "trakt/version"
 require "json"
-require "excon"
+require "httparty"
 require "digest"
 require "trakt/connection"
 require "trakt/account"
@@ -13,6 +15,7 @@ require "trakt/show"
 require "trakt/friends"
 require "trakt/movies"
 require "trakt/genres"
+require "trakt/request"
 
 module Trakt
   class Error < RuntimeError
@@ -23,11 +26,15 @@ module Trakt
     Trakt.new(*a)
   end
   class Trakt
-    attr_accessor :username, :password, :apikey
+    attr_accessor :client_id, :client_secret, :account_id, :token
     def initialize(args={})
-      @username = args[:username]
-      @password = args[:password]
-      @apikey = args[:apikey]
+      @client_id = args[:client_id]
+      @client_secret = args[:client_secret]
+      @account_id = args[:account_id]
+      @token = args[:token]
+    end
+    def access_token
+      account.access_token
     end
     def account
       @account ||= Account.new self

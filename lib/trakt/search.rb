@@ -2,24 +2,19 @@ module Trakt
   class Search
     include Connection
     def movies(query)
-      require_settings %w|apikey|
-      get('/search/movies.json/',clean_query(query))
+      get('/search/movie/?query=',clean_query(query))
     end
     def shows(query)
-      require_settings %w|apikey|
-      get('/search/shows.json/',clean_query(query))
+      get('/search/show/?query=',clean_query(query))
     end
     def episode(query)
-      require_settings %w|apikey|
-      get('/search/episodes.json/',clean_query(query))
+      get('/search/episode/?query=',clean_query(query))
     end
     def people(query)
-      require_settings %w|apikey|
-      get('/search/people.json/',clean_query(query))
+      get('/search/person/?query=',clean_query(query))
     end
     def users(query)
-      require_settings %w|apikey|
-      get('/search/users.json/',clean_query(query))
+      get('/search/list/?query=',clean_query(query))
     end
   end
 end

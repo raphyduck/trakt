@@ -2,12 +2,10 @@ module Trakt
   class Genres
     include Connection
     def movies
-      require_settings %w|apikey|
-      get "/genres/movies.json",''
+      get "/genres/movies",''
     end
     def shows
-      require_settings %w|apikey|
-      get "/genres/shows.json",''
+      get "/genres/shows",''
     end
   end
 end

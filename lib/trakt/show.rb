@@ -2,15 +2,15 @@ module Trakt
   class Show
     include Connection
     def episode_unseen(data)
-      require_settings %w|username password apikey|
+      require_settings %w|client_id client_secret account_id|
       post('show/episode/unseen/', data)
     end
     def episode_seen(data)
-      require_settings %w|username password apikey|
+      require_settings %w|client_id client_secret account_id|
       post('show/episode/seen/', data)
     end
     def seen(data)
-      require_settings %w|username password apikey|
+      require_settings %w|client_id client_secret account_id|
       post('show/seen/', data)
     end
     # need to use thetvdb id here since the slug can't be used for unseen

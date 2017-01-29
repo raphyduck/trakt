@@ -18,5 +18,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "vcr"
-  gem.add_dependency "excon"
+  gem.add_dependency "httparty"
 end
