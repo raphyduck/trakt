@@ -6,7 +6,7 @@ module Trakt
       @headers = {
           'Content-Type' => 'application/json',
           'trakt-api-version' => '2',
-          'trakt-api-key' => trakt.account_id,
+          'trakt-api-key' => trakt.client_id,
       }
     end
 
@@ -62,7 +62,6 @@ module Trakt
       path = '/' + path unless path[0] == '/'
       prepare_connection
       result = Request.post(path, {:body => body.to_json, :headers => @headers})
-      puts result
       parse(result)
     end
 
@@ -86,7 +85,6 @@ module Trakt
       prepare_connection
       full_path = File.join(path, query)
       result = Request.get(full_path, {:headers => @headers})
-      puts result.code
       parse(result)
     end
 
@@ -94,8 +92,6 @@ module Trakt
       prepare_connection
       require_settings %w|account_id|
       arg_path = *args.compact.map { |t| t.to_s}
-      puts arg_path
-      puts arg
       get(path, File.join(arg_path))
     end
 
