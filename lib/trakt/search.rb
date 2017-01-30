@@ -16,5 +16,8 @@ module Trakt
     def users(query)
       get('/search/list/?query=',clean_query(query))
     end
+    def search_by_id(type, id)
+      get("/search/#{type}/", id)
+    end
   end
 end
