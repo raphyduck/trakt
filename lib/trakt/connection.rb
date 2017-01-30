@@ -58,10 +58,8 @@ module Trakt
     end
 
     def post(path,body={})
-      path << '/' unless path[-1] == '/'
-      path = '/' + path unless path[0] == '/'
       prepare_connection
-      result = Request.post(path, {:body => body.to_json, :headers => @headers})
+      result = Request.post(clean_path(path), {:body => body.to_json, :headers => @headers})
       parse(result)
     end
 
@@ -81,10 +79,16 @@ module Trakt
         chomp
     end
 
-    def get(path,query)
+    def clean_path(path)
+      path << '/' unless path[-1] == '/'
+      path = '/' + path unless path[0] == '/'
+      path
+    end
+
+    def get(path,query, c_headers = {})
       prepare_connection
       full_path = File.join(path, query)
-      result = Request.get(full_path, {:headers => @headers})
+      result = Request.get(clean_path(full_path), {:headers => @headers.merge(c_headers)})
       parse(result)
     end
 
@@ -92,7 +96,7 @@ module Trakt
       prepare_connection
       require_settings %w|account_id|
       arg_path = *args.compact.map { |t| t.to_s}
-      get(path, File.join(arg_path))
+      get(clean_path(path), File.join(arg_path))
     end
 
     private :get_with_args, :get, :post, :parse, :clean_query, :require

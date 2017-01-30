@@ -9,10 +9,6 @@ module Trakt
       @add_info = result
       return self
     end
-    def get(slug)
-      @slug = slug
-      return self
-    end
     def add_item(data)
       add_items([data])
     end
@@ -28,8 +24,16 @@ module Trakt
     def delete
       post "lists/delete/", 'slug' => slug
     end
+    def list(name = 'watchlist', sort_by = 'released', sort_order = 'asc')
+      c_headers = {'X-Sort-By' => sort_by, 'X-Sort-How' => sort_order}
+      get("users/#{@trakt.account_id}/lists/", name, c_headers)
+    end
     def update(options)
       post "lists/update/", options.merge('slug' => slug)
+    end
+    def watchlist(type = 'movies', sort_by = 'released', sort_order = 'asc')
+      c_headers = {'X-Sort-By' => sort_by, 'X-Sort-How' => sort_order}
+      get("users/#{@trakt.account_id}/watchlist/", type, c_headers)
     end
   end
 end
