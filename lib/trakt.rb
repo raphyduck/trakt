@@ -16,6 +16,7 @@ require "trakt/friends"
 require "trakt/movies"
 require "trakt/genres"
 require "trakt/request"
+require "trakt/sync"
 
 module Trakt
   class Error < RuntimeError
@@ -62,6 +63,9 @@ module Trakt
     end
     def show
       @show ||= Show.new self
+    end
+    def sync
+      @sync ||= Sync.new self
     end
   end
 end
