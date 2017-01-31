@@ -40,8 +40,7 @@ module Trakt
       get("users/#{@trakt.account_id}/lists/", name, c_headers)
     end
 
-    def watchlist(type = 'movies', sort_by = 'released', sort_order = 'asc')
-      c_headers = {'X-Sort-By' => sort_by, 'X-Sort-How' => sort_order}
+    def watchlist(type = 'movies')
       get("users/#{@trakt.account_id}/watchlist/", type, c_headers)
     end
   end
