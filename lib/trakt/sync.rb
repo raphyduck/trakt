@@ -20,7 +20,7 @@ module Trakt
         when 'collection'
           post("/sync/collection#{'/remove' if action == 'remove'}", options)
         else
-          post("/users/#{@trakt.account_id}/lists/#{list_name}/items/#{'/remove' if action == 'remove'}", type => options)
+          post("/users/#{@trakt.account_id}/lists/#{list_name}/items/#{'/remove' if action == 'remove'}", options)
       end
     end
 
