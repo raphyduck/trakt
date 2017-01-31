@@ -36,8 +36,7 @@ module Trakt
     def delete
       post "lists/delete/", 'slug' => slug
     end
-    def list(name = 'watchlist', sort_by = 'released', sort_order = 'asc')
-      c_headers = {'X-Sort-By' => sort_by, 'X-Sort-How' => sort_order}
+    def list(name = 'watchlist')
       get("users/#{@trakt.account_id}/lists/", name, c_headers)
     end
 
