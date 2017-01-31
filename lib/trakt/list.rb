@@ -23,6 +23,10 @@ module Trakt
       get("users/#{@trakt.account_id}/", "history/#{type}/#{item}")
     end
 
+    def get_user_list(name)
+      get("users/#{@trakt.account_id}/lists/", name)
+    end
+
     def get_user_lists
       get("/users/#{@trakt.account_id}/", "lists")
     end
@@ -36,12 +40,12 @@ module Trakt
     def delete
       post "lists/delete/", 'slug' => slug
     end
-    def list(name = 'watchlist')
-      get("users/#{@trakt.account_id}/lists/", name, c_headers)
+    def list(name = 'watchlist', type = '')
+      get("users/#{@trakt.account_id}/lists/", name + '/items/' + type)
     end
 
     def watchlist(type = 'movies')
-      get("users/#{@trakt.account_id}/watchlist/", type, c_headers)
+      get("users/#{@trakt.account_id}/watchlist/", type)
     end
   end
 end
