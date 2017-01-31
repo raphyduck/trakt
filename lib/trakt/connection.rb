@@ -90,6 +90,8 @@ module Trakt
       full_path = File.join(path, query)
       result = Request.get(clean_path(full_path), {:headers => @headers.merge(c_headers)})
       parse(result)
+    rescue => e
+      {'error' => e.to_s}
     end
 
     def get_with_args(path,*args)
