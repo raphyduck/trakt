@@ -24,7 +24,7 @@ module Trakt
 
     def validate_item(type, list)
       raise "Invalid type #{type}" unless ['movies', 'shows', 'episodes', ''].include?(type)
-      raise "Invalid type of list. 'list' must be an Array" unless list.is_a?(Array)
+      raise "Invalid type of list. 'list' must be an Array" unless list.is_a?(Array) || list.is_a?(Hash)
     end
   end
 end
