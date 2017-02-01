@@ -31,6 +31,10 @@ module Trakt
       get("/users/#{@trakt.account_id}/", "lists")
     end
 
+    def get_watched(type)
+      get("/users/#{@trakt.account_id}/", "watched/#{type}")
+    end
+
     def item_delete(data)
       items_delete([data])
     end
