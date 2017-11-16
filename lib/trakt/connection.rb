@@ -8,6 +8,7 @@ module Trakt
           'trakt-api-version' => '2',
           'trakt-api-key' => trakt.client_id,
       }
+      @speaker = trakt.speaker
     end
 
     def get_access_token
@@ -20,7 +21,7 @@ module Trakt
       user_code = r['user_code']
       expires_in = r['expires_in']
       interval = r['interval']
-      puts "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
+      @speaker.speak_up "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
       data['code'] = device_code
       data['client_secret'] = @trakt.client_secret
       end_time = Time.now + expires_in.to_i.seconds
@@ -35,7 +36,7 @@ module Trakt
           when 400
             print '....'
           else
-            puts "Error, received status code #{polling_request.code}"
+            @speaker.speak_up "Error, received status code #{polling_request.code}"
             break
         end
       end
