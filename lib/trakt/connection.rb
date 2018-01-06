@@ -81,7 +81,7 @@ module Trakt
     end
 
     def clean_path(path)
-      path << '/' unless path[-1] == '/'
+      path << '/' unless path[-1] == '/' || path.include?('?')
       path = '/' + path unless path[0] == '/'
       path
     end
