@@ -1,6 +1,7 @@
 module Trakt
   class Sync
     include Connection
+
     def mark_watched(list, type)
       validate_item(type, list)
       require_settings %w|client_id client_secret account_id|
@@ -10,16 +11,19 @@ module Trakt
       post('/sync/history', options)
     end
 
-    def add_or_remove_item(action, list_type, type, list, list_name = '')
+    def add_or_remove_item(action, list_name, type, list)
       validate_item(type, list)
       require_settings %w|client_id client_secret account_id|
       options = list.is_a?(Array) ? {type => list} : list
-      case list_type
+      case list_name
+        when 'watchlist'
+          u = '/sync/watchlist'
         when 'collection'
-          post("/sync/collection#{'/remove' if action == 'remove'}", options)
+          u = '/sync/collection'
         else
-          post("/users/#{@trakt.account_id}/lists/#{list_name}/items/#{'/remove' if action == 'remove'}", options)
+          u = "/users/#{@trakt.account_id}/lists/#{list_name}/items"
       end
+      post("#{u}#{'/remove' if action == 'remove'}", options)
     end
 
     def validate_item(type, list)
