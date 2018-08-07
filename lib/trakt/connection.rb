@@ -15,7 +15,7 @@ module Trakt
       token_array = nil
       data = {client_id: @trakt.client_id}
       if @trakt.token.nil? || @trakt.token['refresh_token'].nil?
-        r = JSON.load(Request.post('/oauth/device/code', {:body => JSON.dump(data)}).body)
+        r = JSON.load(Request.post('/oauth/device/code', {:body => Utils.recursive_typify_keys(data, 0)}).body)
         device_code = r['device_code']
         user_code = r['user_code']
         expires_in = r['expires_in']
@@ -43,11 +43,10 @@ module Trakt
     def request_token(url, data)
       data[:client_secret] = @trakt.client_secret unless data[:client_secret]
       success, token_array = 1, nil
-      polling_request = Request.post(url, {:body => JSON.dump(data)})
+      polling_request = Request.post(url, {:body => Utils.recursive_typify_keys(data, 0)})
       case polling_request.code
       when 200
         token_array = JSON.load(polling_request.body)
-        token_array['expires_in'] = Time.now + token['expires_in'].to_i.seconds
       when 400
         success = 0
       else
