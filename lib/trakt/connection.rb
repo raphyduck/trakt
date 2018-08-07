@@ -2,7 +2,6 @@ module Trakt
   module Connection
     def initialize(trakt)
       @trakt = trakt
-      @token = trakt.token
       @headers = {
           'Content-Type' => 'application/json',
           'trakt-api-version' => '2',
@@ -12,10 +11,10 @@ module Trakt
     end
 
     def get_access_token
-      return @token if @token
+      return @trakt.token if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
       token_array = nil
       data = {client_id: @trakt.client_id}
-      if @trakt.refresh_token.nil?
+      if @trakt.token.nil? || @trakt.token['refresh_token'].nil?
         r = JSON.load(Request.post('/oauth/device/code', {:body => JSON.dump(data)}).body)
         device_code = r['device_code']
         user_code = r['user_code']
@@ -32,12 +31,12 @@ module Trakt
           print '.'
         end
       else
-        data[:refresh_token] = @trakt.refresh_token
+        data[:refresh_token] = @trakt.token['refresh_token']
         data[:redirect_uri] = "urn:ietf:wg:oauth:2.0:oob"
         data[:grant_type] = "refresh_token"
         _, token_array = request_token('/oauth/token', data)
       end
-      @token = token_array if token_array
+      @trakt.token = token_array if token_array
       token_array
     end
 
@@ -48,6 +47,7 @@ module Trakt
       case polling_request.code
       when 200
         token_array = JSON.load(polling_request.body)
+        token_array['expires_in'] = Time.now + token['expires_in'].to_i.seconds
       when 400
         success = 0
       else

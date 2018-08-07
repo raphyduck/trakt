@@ -27,13 +27,12 @@ module Trakt
     Trakt.new(*a)
   end
   class Trakt
-    attr_accessor :client_id, :client_secret, :account_id, :token, :refresh_token, :speaker
+    attr_accessor :client_id, :client_secret, :account_id, :speaker, :token
     def initialize(args={})
       @client_id = args[:client_id]
       @client_secret = args[:client_secret]
       @account_id = args[:account_id]
       @token = args[:token]
-      @refresh_token = args[:refresh_token]
       @speaker = args[:speaker] || SimpleSpeaker::Speaker.new
     end
     def access_token
