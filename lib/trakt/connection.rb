@@ -12,39 +12,49 @@ module Trakt
     end
 
     def get_access_token
-      #TODO: Refresh token
       return @token if @token
       token_array = nil
-      data = {'client_id': @trakt.client_id}
-      r = JSON.load(Request.post( '/oauth/device/code',{:body => data}).body)
-      device_code = r['device_code']
-      user_code = r['user_code']
-      expires_in = r['expires_in']
-      interval = r['interval']
-      @speaker.speak_up "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
-      data['code'] = device_code
-      data['client_secret'] = @trakt.client_secret
-      end_time = Time.now + expires_in.to_i.seconds
-      print 'Waiting...'
-      while Time.now < end_time
-        sleep(interval)
-        polling_request = Request.post('/oauth/device/token', {:body => data})
-        case polling_request.code
-          when 200
-            token_array = JSON.load(polling_request.body)
-            break
-          when 400
-            print '....'
-          else
-            @speaker.speak_up "Error, received status code #{polling_request.code}"
-            break
+      data = {client_id: @trakt.client_id}
+      if @trakt.refresh_token.nil?
+        r = JSON.load(Request.post('/oauth/device/code', {:body => JSON.dump(data)}).body)
+        device_code = r['device_code']
+        user_code = r['user_code']
+        expires_in = r['expires_in']
+        interval = r['interval']
+        @speaker.speak_up "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
+        data[:code] = device_code
+        end_time = Time.now + expires_in.to_i.seconds
+        print 'Waiting...'
+        while Time.now < end_time
+          sleep(interval)
+          success, token_array = request_token('/oauth/device/token', data)
+          break if success < 0 || token_array
+          print '.'
         end
+      else
+        data[:refresh_token] = @trakt.refresh_token
+        data[:redirect_uri] = "urn:ietf:wg:oauth:2.0:oob"
+        data[:grant_type] = "refresh_token"
+        _, token_array = request_token('/oauth/token', data)
       end
-      if token_array
-        @token = token_array
-        return token_array
+      @token = token_array if token_array
+      token_array
+    end
+
+    def request_token(url, data)
+      data[:client_secret] = @trakt.client_secret unless data[:client_secret]
+      success, token_array = 1, nil
+      polling_request = Request.post(url, {:body => JSON.dump(data)})
+      case polling_request.code
+      when 200
+        token_array = JSON.load(polling_request.body)
+      when 400
+        success = 0
+      else
+        @speaker.speak_up "Error, received status code #{polling_request.code}"
+        success = -1
       end
-      nil
+      return success, token_array
     end
 
     def require_settings(required)
@@ -58,14 +68,14 @@ module Trakt
       @headers.merge!({'Authorization' => "Bearer #{access_token}"}) if access_token
     end
 
-    def post(path,body={})
+    def post(path, body = {})
       prepare_connection
       result = Request.post(clean_path(path), {:body => body.to_json, :headers => @headers})
       parse(result)
     end
 
     def parse(result)
-      parsed =  JSON.parse result.body
+      parsed = JSON.parse result.body
       if parsed.kind_of? Hash and parsed['status'] and parsed['status'] == 'failure'
         raise Error.new(parsed['error'])
       end
@@ -73,11 +83,11 @@ module Trakt
     end
 
     def clean_query(query)
-      query.gsub(/[()]/,'').
-        gsub(' ','+').
-        gsub('&','and').
-        gsub('!','').
-        chomp
+      query.gsub(/[()]/, '').
+          gsub(' ', '+').
+          gsub('&', 'and').
+          gsub('!', '').
+          chomp
     end
 
     def clean_path(path)
@@ -86,7 +96,7 @@ module Trakt
       path
     end
 
-    def get(path,query, c_headers = {})
+    def get(path, query, c_headers = {})
       prepare_connection
       full_path = File.join(path, query)
       result = Request.get(clean_path(full_path), {:headers => @headers.merge(c_headers)})
@@ -95,10 +105,10 @@ module Trakt
       {'error' => e.to_s}
     end
 
-    def get_with_args(path,*args)
+    def get_with_args(path, *args)
       prepare_connection
       require_settings %w|account_id|
-      arg_path = *args.compact.map { |t| t.to_s}
+      arg_path = *args.compact.map {|t| t.to_s}
       get(clean_path(path), File.join(arg_path))
     end
 
