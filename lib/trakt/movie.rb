@@ -22,6 +22,9 @@ module Trakt
     def related(*args)
       get_with_args('/search/related.json/', *args)
     end
+    def releases(movie_id, country, *args)
+      get_with_args("/movies/#{movie_id}/releases/#{country}", *args)
+    end
     def shouts(*args)
       get_with_args('/search/shouts.json/', *args)
     end
