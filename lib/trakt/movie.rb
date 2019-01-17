@@ -1,6 +1,9 @@
 module Trakt
   class Movie
     include Connection
+    def aliases(movie_id)
+      get_with_args("/movies/#{movie_id}/aliases")
+    end
     def cancelcheckin
       post("/movie/cancelcheckin")
     end
