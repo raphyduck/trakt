@@ -4,6 +4,7 @@ require "trakt/version"
 require "json"
 require "httparty"
 require "digest"
+require 'simple_speaker'
 require "trakt/connection"
 require "trakt/account"
 require "trakt/list"
@@ -17,6 +18,7 @@ require "trakt/movies"
 require "trakt/genres"
 require "trakt/request"
 require "trakt/sync"
+require 'trakt/trakt_utils'
 
 module Trakt
   class Error < RuntimeError

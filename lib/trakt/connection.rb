@@ -43,14 +43,14 @@ module Trakt
     def request_token(url, data)
       data[:client_secret] = @trakt.client_secret unless data[:client_secret]
       success, token_array = 1, nil
-      polling_request = Request.post(url, {:body => Utils.recursive_typify_keys(data, 0)})
+      polling_request = Request.post(url, {:body => TraktUtils.recursive_typify_keys(data, 0)})
       case polling_request.code
       when 200
         token_array = JSON.load(polling_request.body)
       when 400
         success = 0
       else
-        @speaker.speak_up "Error, received status code #{polling_request.code}"
+        @speaker.speak_up "Error, received status code #{polling_request.code} for request body => '#{TraktUtils.recursive_typify_keys(data, 0)}'"
         success = -1
       end
       return success, token_array
