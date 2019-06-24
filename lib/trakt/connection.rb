@@ -11,7 +11,7 @@ module Trakt
     end
 
     def get_access_token
-      return @trakt.token if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
+      return @trakt.token if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
       token_array = nil
       data = {client_id: @trakt.client_id}
       if @trakt.token.nil? || @trakt.token['refresh_token'].nil?
