@@ -15,8 +15,8 @@ module Trakt
       post("/users/#{@trakt.account_id}/lists", data)
     end
 
-    def collection(type)
-     get("users/#{@trakt.account_id}/", "collection/#{type}")
+    def collection(type, extra = '')
+     get("users/#{@trakt.account_id}/", "collection/#{type}#{extra}")
     end
 
     def get_history(type = '', item = '')
