@@ -14,7 +14,7 @@ module Trakt
       return @trakt.token if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
       token_array = nil
       data = {client_id: @trakt.client_id}
-      if @trakt.token.nil? || @trakt.token['refresh_token'].nil?
+      if @trakt.token.nil? || @trakt.token['refresh_token'].nil? || Time.now >= Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
         r = JSON.load(Request.post('/oauth/device/code', {:body => Utils.recursive_typify_keys(data, 0)}).body)
         device_code = r['device_code']
         user_code = r['user_code']
@@ -50,7 +50,7 @@ module Trakt
       when 400
         success = 0
       else
-        @speaker.speak_up "Error, received status code #{polling_request.code} for request body => '#{TraktUtils.recursive_typify_keys(data, 0)}'"
+        @speaker.speak_up "Error, received status code #{polling_request.code} for request body => '#{TraktUtils.recursive_typify_keys(data, 0)}' to url '#{url}'"
         success = -1
       end
       return success, token_array
