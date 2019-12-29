@@ -11,10 +11,14 @@ module Trakt
     end
 
     def get_access_token
-      return @trakt.token if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
+      if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
+        @speaker.speak_up "Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}"
+        return @trakt.token
+      end
       token_array = nil
       data = {client_id: @trakt.client_id}
       if @trakt.token.nil? || @trakt.token['refresh_token'].nil? || Time.now >= Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
+        @speaker.speak_up "No valid token found, needs to fetch a new one"
         r = JSON.load(Request.post('/oauth/device/code', {:body => Utils.recursive_typify_keys(data, 0)}).body)
         device_code = r['device_code']
         user_code = r['user_code']
@@ -31,6 +35,7 @@ module Trakt
           print '.'
         end
       else
+        @speaker.speak_up "Existing token expired, needs to fetch a new one with refresh_token '#{@trakt.token['refresh_token']}'"
         data[:refresh_token] = @trakt.token['refresh_token']
         data[:redirect_uri] = "urn:ietf:wg:oauth:2.0:oob"
         data[:grant_type] = "refresh_token"
