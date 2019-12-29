@@ -12,7 +12,7 @@ module Trakt
 
     def get_access_token
       if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
-        @speaker.speak_up "Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}"
+        @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}", 0)
         return @trakt.token
       end
       token_array = nil
