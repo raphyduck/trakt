@@ -2,6 +2,7 @@ module Trakt
   module Connection
     def initialize(trakt)
       @trakt = trakt
+      @ainit = false
       @headers = {
           'Content-Type' => 'application/json',
           'trakt-api-version' => '2',
@@ -12,7 +13,10 @@ module Trakt
 
     def get_access_token
       if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
-        @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}", 0)
+        unless @ainit
+          @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}", 0)
+          @ainit = true
+        end
         return @trakt.token
       end
       token_array = nil
