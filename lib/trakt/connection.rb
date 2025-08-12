@@ -4,33 +4,53 @@ module Trakt
       @trakt = trakt
       @ainit = false
       @headers = {
-          'Content-Type' => 'application/json',
-          'trakt-api-version' => '2',
-          'trakt-api-key' => trakt.client_id,
+        'Content-Type' => 'application/json',
+        'trakt-api-version' => '2',
+        'trakt-api-key' => trakt.client_id,
       }
       @speaker = trakt.speaker
     end
 
     def get_access_token
-      if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days
+begin
+  token = @trakt&.token
+  if token.is_a?(Hash) && token['created_at'] && token['expires_in']
+    expires_in  = token['expires_in'].to_i
+    created_at  = token['created_at'].to_i
+    expires_at  = Time.at(created_at + expires_in)
+    # Marge = min(5 min, 10% d'expiration), bornée pour rester >= 0 et < expires_in-60
+    m1 = 300
+    m2 = (expires_in * 0.1).to_i
+    margin = [m1, m2].min
+    margin = [margin, [expires_in - 60, 0].max].min
+    valid_until = expires_at - margin
+    if Time.now < valid_until
+      @speaker.speak_up("Existing token created on #{Time.at(created_at)}, should be refreshed on #{valid_until}", 0) rescue nil
+      return token
+    end
+  end
+rescue => e
+  @speaker.tell_error(e, "get_access_token early validity check") rescue nil
+end
+      if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - (7 * 24 * 60 * 60)
         unless @ainit
-          @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - 7.days}", 0)
+          @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - (7 * 24 * 60 * 60)}", 0)
           @ainit = true
         end
         return @trakt.token
       end
       token_array = nil
-      data = {client_id: @trakt.client_id}
+      data = { client_id: @trakt.client_id }
       if @trakt.token.nil? || @trakt.token['refresh_token'].nil? || Time.now >= Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
         @speaker.speak_up "No valid token found, needs to fetch a new one"
-        r = JSON.load(Request.post('/oauth/device/code', {:body => Utils.recursive_typify_keys(data, 0)}).body)
+        r = JSON.load(Request.post('/oauth/device/code', { :body => TraktUtils.recursive_typify_keys(data, 0) }).body)
         device_code = r['device_code']
         user_code = r['user_code']
         expires_in = r['expires_in']
         interval = r['interval']
         @speaker.speak_up "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
         data[:code] = device_code
-        end_time = Time.now + expires_in.to_i.seconds
+        end_time = Time.now + expires_in.to_i
         print 'Waiting...'
         while Time.now < end_time
           sleep(interval)
@@ -43,7 +63,15 @@ module Trakt
         data[:refresh_token] = @trakt.token['refresh_token']
         data[:redirect_uri] = "urn:ietf:wg:oauth:2.0:oob"
         data[:grant_type] = "refresh_token"
-        _, token_array = request_token('/oauth/token', data)
+        success, token_array = request_token('/oauth/token', data)
+        if success < 0 || token_array.nil?
+          if @trakt.token && @trakt.token.is_a?(Hash)
+            @trakt.token['created_at'] = Time.now.to_i
+            @trakt.token['expires_in'] = 3600
+          end
+          @speaker.speak_up("Failed to refresh access token; continuing with existing token", 0) rescue nil
+          return @trakt.token
+        end
       end
       @trakt.token = token_array if token_array
       token_array
@@ -52,7 +80,7 @@ module Trakt
     def request_token(url, data)
       data[:client_secret] = @trakt.client_secret unless data[:client_secret]
       success, token_array = 1, nil
-      polling_request = Request.post(url, {:body => TraktUtils.recursive_typify_keys(data, 0)})
+      polling_request = Request.post(url, { :body => TraktUtils.recursive_typify_keys(data, 0) })
       case polling_request.code
       when 200
         token_array = JSON.load(polling_request.body)
@@ -73,12 +101,12 @@ module Trakt
 
     def prepare_connection
       access_token = get_access_token['access_token'] rescue access_token = nil
-      @headers.merge!({'Authorization' => "Bearer #{access_token}"}) if access_token
+      @headers.merge!({ 'Authorization' => "Bearer #{access_token}" }) if access_token
     end
 
     def post(path, body = {})
       prepare_connection
-      result = Request.post(clean_path(path), {:body => body.to_json, :headers => @headers})
+      result = Request.post(clean_path(path), { :body => body.to_json, :headers => @headers })
       parse(result)
     end
 
@@ -92,10 +120,10 @@ module Trakt
 
     def clean_query(query)
       query.gsub(/[()]/, '').
-          gsub(' ', '+').
-          gsub('&', 'and').
-          gsub('!', '').
-          chomp
+        gsub(' ', '+').
+        gsub('&', 'and').
+        gsub('!', '').
+        chomp
     end
 
     def clean_path(path)
@@ -107,16 +135,16 @@ module Trakt
     def get(path, query, c_headers = {})
       prepare_connection
       full_path = File.join(path, query)
-      result = Request.get(clean_path(full_path), {:headers => @headers.merge(c_headers)})
+      result = Request.get(clean_path(full_path), { :headers => @headers.merge(c_headers) })
       parse(result)
     rescue => e
-      {'error' => e.to_s}
+      { 'error' => e.to_s }
     end
 
     def get_with_args(path, *args)
       prepare_connection
       require_settings %w|account_id|
-      arg_path = *args.compact.map {|t| t.to_s}
+      arg_path = *args.compact.map { |t| t.to_s }
       get(clean_path(path), File.join(arg_path))
     end
 
