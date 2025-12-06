@@ -4,7 +4,6 @@ require "trakt/version"
 require "json"
 require "httparty"
 require "digest"
-require 'simple_speaker'
 require "trakt/connection"
 require "trakt/account"
 require "trakt/list"
@@ -29,13 +28,12 @@ module Trakt
     Trakt.new(*a)
   end
   class Trakt
-    attr_accessor :client_id, :client_secret, :account_id, :speaker, :token
+    attr_accessor :client_id, :client_secret, :account_id, :token
     def initialize(args={})
       @client_id = args[:client_id]
       @client_secret = args[:client_secret]
       @account_id = args[:account_id]
       @token = args[:token]
-      @speaker = args[:speaker] || SimpleSpeaker::Speaker.new
     end
     def access_token
       account.access_token

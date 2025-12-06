@@ -8,7 +8,6 @@ module Trakt
         'trakt-api-version' => '2',
         'trakt-api-key' => trakt.client_id,
       }
-      @speaker = trakt.speaker
     end
 
     def get_access_token
@@ -25,16 +24,18 @@ begin
     margin = [margin, [expires_in - 60, 0].max].min
     valid_until = expires_at - margin
     if Time.now < valid_until
-      @speaker.speak_up("Existing token created on #{Time.at(created_at)}, should be refreshed on #{valid_until}", 0) rescue nil
+      puts("Existing token created on #{Time.at(created_at)}, should be refreshed on #{valid_until}", 0) rescue nil
       return token
     end
   end
 rescue => e
-  @speaker.tell_error(e, "get_access_token early validity check") rescue nil
+  $stderr.puts("ERROR in Trakt::Connection.get_access_token early validity check" + @new_line)
+  $stderr.puts(e.to_s)
+  $stderr.puts(e.backtrace[0..2].join(@new_line))
 end
       if @trakt.token && Time.now < Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - (7 * 24 * 60 * 60)
         unless @ainit
-          @speaker.speak_up("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - (7 * 24 * 60 * 60)}", 0)
+          puts("Existing token created on #{Time.at(@trakt.token['created_at'].to_i)}, should be refreshed on #{Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i) - (7 * 24 * 60 * 60)}", 0)
           @ainit = true
         end
         return @trakt.token
@@ -42,13 +43,13 @@ end
       token_array = nil
       data = { client_id: @trakt.client_id }
       if @trakt.token.nil? || @trakt.token['refresh_token'].nil? || Time.now >= Time.at(@trakt.token['created_at'].to_i + @trakt.token['expires_in'].to_i)
-        @speaker.speak_up "No valid token found, needs to fetch a new one"
+        puts "No valid token found, needs to fetch a new one"
         r = JSON.load(Request.post('/oauth/device/code', { :body => TraktUtils.recursive_typify_keys(data, 0) }).body)
         device_code = r['device_code']
         user_code = r['user_code']
         expires_in = r['expires_in']
         interval = r['interval']
-        @speaker.speak_up "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
+        puts "Please visit #{r['verification_url']} and authorize your app. Your user code is #{user_code} . Your code expires in #{expires_in.to_i / 60.0} minutes."
         data[:code] = device_code
         end_time = Time.now + expires_in.to_i
         print 'Waiting...'
@@ -59,7 +60,7 @@ end
           print '.'
         end
       else
-        @speaker.speak_up "Existing token expired, needs to fetch a new one with refresh_token '#{@trakt.token['refresh_token']}'"
+        puts "Existing token expired, needs to fetch a new one with refresh_token '#{@trakt.token['refresh_token']}'"
         data[:refresh_token] = @trakt.token['refresh_token']
         data[:redirect_uri] = "urn:ietf:wg:oauth:2.0:oob"
         data[:grant_type] = "refresh_token"
@@ -69,7 +70,7 @@ end
             @trakt.token['created_at'] = Time.now.to_i
             @trakt.token['expires_in'] = 3600
           end
-          @speaker.speak_up("Failed to refresh access token; continuing with existing token", 0) rescue nil
+          puts("Failed to refresh access token; continuing with existing token", 0) rescue nil
           return @trakt.token
         end
       end
@@ -87,7 +88,7 @@ end
       when 400
         success = 0
       else
-        @speaker.speak_up "Error, received status code #{polling_request.code} for request body => '#{TraktUtils.recursive_typify_keys(data, 0)}' to url '#{url}'"
+        puts "Error, received status code #{polling_request.code} for request body => '#{TraktUtils.recursive_typify_keys(data, 0)}' to url '#{url}'"
         success = -1
       end
       return success, token_array
