@@ -27,7 +27,14 @@ module Trakt
 
     def calendar(scope, segment, start_date, days)
       path = ['/calendars', scope, segment].join('/')
-      get_with_args(path, *[start_date, days].compact)
+      calendar_get_with_args(path, scope, *[start_date, days].compact)
+    end
+
+    def calendar_get_with_args(path, scope, *args)
+      require_settings %w|account_id| if scope == 'my'
+      prepare_connection
+      arg_path = args.compact.map { |t| t.to_s }
+      get(clean_path(path), File.join(arg_path))
     end
   end
 end
