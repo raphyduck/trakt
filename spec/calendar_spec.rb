@@ -4,25 +4,28 @@ describe Trakt do
   describe Trakt::Calendar do
     let(:trakt) do
       details = get_account_details
-      trakt          = Trakt.new :apikey => details['apikey'],
-        :username => details['username'],
-        :password => details['password']
-      trakt
-    end
-    context "premieres" do
-      it "should get premieres" do
-        result = record(self) do
-          trakt.calendar.premieres(20110421, 1)
-        end
-        result.first['episodes'].first['show']['title'].should == "24 Hour Restaurant Battle"
-      end
+      Trakt.new(
+        client_id: details['client_id'],
+        client_secret: details['client_secret'],
+        account_id: details['account_id'],
+        token: details['token']
+      )
     end
     context "shows" do
-      it "should get shows" do
+      it "fetches shows from calendar" do
         result = record(self) do
-          trakt.calendar.shows(20110416, 1)
+          trakt.calendar.shows('2024-01-01', 2)
         end
-        result.first['episodes'].first['show']['title'].should == "Gosick"
+        result.first['show']['title'].should == "Example Show"
+      end
+    end
+
+    context "premieres" do
+      it "fetches premieres from calendar" do
+        result = record(self) do
+          trakt.calendar.premieres('2024-02-01', 1)
+        end
+        result.first['show']['title'].should == "Premiered Show"
       end
     end
   end

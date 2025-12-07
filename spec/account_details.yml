@@ -1,0 +1,13 @@
+client_id: sample_client_id
+client_secret: sample_client_secret
+account_id: sample_account_id
+token:
+  access_token: sample_access_token
+  token_type: bearer
+  expires_in: 31536000
+  refresh_token: sample_refresh_token
+  scope: public
+  created_at: 1893456000
+apikey: legacy_key
+username: legacy_user
+password: legacy_password

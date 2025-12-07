@@ -1,0 +1,30 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/shows/2024-01-01/2/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - sample_client_id
+      Authorization:
+      - Bearer sample_access_token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"first_aired":"2024-01-01T00:00:00.000Z","episode":{"season":1,"number":1,"title":"Resolution","ids":{"trakt":101}},"show":{"title":"Example Show","year":2024,"ids":{"trakt":201}}}]'
+    http_version: 
+  recorded_at: Tue, 01 Jan 2024 00:00:00 GMT
+recorded_with: VCR 6.0.0
