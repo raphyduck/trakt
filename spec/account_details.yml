@@ -1,0 +1,10 @@
+account_id: "calendar-account"
+client_id: "calendar-client-id"
+client_secret: "calendar-client-secret"
+token:
+  access_token: "calendar-access-token"
+  token_type: "bearer"
+  expires_in: 315576000
+  refresh_token: "calendar-refresh-token"
+  scope: "public"
+  created_at: 1900000000

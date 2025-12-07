@@ -1,0 +1,165 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/shows/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"first_aired":"2024-02-01T00:00:00.000Z","episode":{"season":1,"number":2,"title":"All Returning Episode"},"show":{"title":"All Returning Show","year":2024,"ids":{"slug":"all-returning-show"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/shows/new/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"first_aired":"2024-02-02T00:00:00.000Z","episode":{"season":1,"number":2,"title":"All New Episode"},"show":{"title":"All New Show","year":2024,"ids":{"slug":"all-new-show"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/shows/premieres/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"first_aired":"2024-02-03T00:00:00.000Z","episode":{"season":1,"number":2,"title":"All Premiere Episode"},"show":{"title":"All Premiere Show","year":2024,"ids":{"slug":"all-premiere-show"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/shows/seasons/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"first_aired":"2024-02-04T00:00:00.000Z","season":{"number":2,"episode_count":10},"show":{"title":"Seasonal All Show","year":2024,"ids":{"slug":"seasonal-all-show"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/movies/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"released":"2024-02-05","movie":{"title":"All Calendar Movie","year":2024,"ids":{"slug":"all-calendar-movie"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+- request:
+    method: get
+    uri: https://api.trakt.tv/calendars/all/movies/new/2024-01-01/3/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      trakt-api-version:
+      - '2'
+      trakt-api-key:
+      - calendar-client-id
+      Authorization:
+      - Bearer calendar-access-token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '[{"released":"2024-02-06","movie":{"title":"All New Calendar Movie","year":2024,"ids":{"slug":"all-new-calendar-movie"}}}]'
+    http_version: '1.1'
+  recorded_at: Wed, 01 Jan 2024 00:00:00 GMT
+recorded_with: VCR 6.0.0
