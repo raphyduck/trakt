@@ -98,4 +98,63 @@ RSpec.describe Trakt::Calendar do
       key: 'movie', title_path: %w[movie title], title: 'All New Calendar Movie',
       path: '/calendars/all/movies/new/2024-01-01/3/'
   end
+
+  describe 'omdb enrichment' do
+    let(:trakt) do
+      Trakt::Trakt.new(
+        account_id: 'account-id',
+        client_id: 'client-id',
+        client_secret: 'client-secret',
+        token: { 'access_token' => 'access-token' },
+        omdb_api_key: omdb_api_key
+      )
+    end
+    let(:omdb_api_key) { nil }
+    let(:items) { [{ 'show' => { 'title' => 'Sample', 'ids' => { 'imdb' => 'tt1234567' } } }] }
+
+    before do
+      allow(calendar).to receive(:prepare_connection)
+      allow(calendar).to receive(:get).and_return(items)
+    end
+
+    it 'returns calendar data as-is when no OMDB key is present' do
+      allow(Trakt::Omdb).to receive(:new)
+
+      response = calendar.send(:calendar_get_with_args, '/calendars/all/shows', 'all')
+
+      expect(response.first['show']).not_to have_key('imdb_rating')
+      expect(Trakt::Omdb).not_to have_received(:new)
+    end
+
+    context 'with an OMDB API key' do
+      let(:omdb_api_key) { 'omdb-key' }
+      let(:omdb_client) { instance_double(Trakt::Omdb) }
+
+      before do
+        allow(Trakt::Omdb).to receive(:new).with('omdb-key').and_return(omdb_client)
+      end
+
+      it 'adds imdb rating data to items with imdb ids' do
+        allow(omdb_client).to receive(:ratings_for).with('tt1234567').and_return(
+          'imdb_rating' => 8.5,
+          'imdb_votes' => 123_456
+        )
+
+        response = calendar.send(:calendar_get_with_args, '/calendars/all/shows', 'all')
+
+        expect(response.first['show']['imdb_rating']).to eq(8.5)
+        expect(response.first['show']['imdb_votes']).to eq(123_456)
+      end
+
+      it 'skips OMDB lookup when data is already present' do
+        items.first['show']['imdb_rating'] = 7.0
+        allow(omdb_client).to receive(:ratings_for)
+
+        response = calendar.send(:calendar_get_with_args, '/calendars/all/shows', 'all')
+
+        expect(response.first['show']['imdb_rating']).to eq(7.0)
+        expect(omdb_client).not_to have_received(:ratings_for)
+      end
+    end
+  end
 end

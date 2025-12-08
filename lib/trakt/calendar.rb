@@ -34,7 +34,32 @@ module Trakt
       require_settings %w|account_id| if scope == 'my'
       prepare_connection
       arg_path = args.compact.map { |t| t.to_s }
-      get(clean_path(path), File.join(arg_path))
+      items = get(clean_path(path), File.join(arg_path))
+      return items unless omdb_client
+
+      items.each do |item|
+        target = omdb_target(item)
+        next unless target && target['imdb_rating'].nil? && target['imdb_votes'].nil?
+
+        rating = omdb_client.ratings_for(target.dig('ids', 'imdb'))
+        next unless rating
+
+        target.merge!(rating)
+      end
+
+      items
+    end
+
+    def omdb_client
+      return unless @trakt.respond_to?(:omdb_api_key) && @trakt.omdb_api_key
+
+      @omdb_client ||= Omdb.new(@trakt.omdb_api_key)
+    end
+
+    def omdb_target(item)
+      [item['show'], item['movie'], item['episode'], item].find do |candidate|
+        candidate.is_a?(Hash) && candidate.dig('ids', 'imdb')
+      end
     end
   end
 end
