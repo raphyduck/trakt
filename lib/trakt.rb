@@ -21,6 +21,11 @@ require 'trakt/trakt_utils'
 
 module Trakt
   class Error < RuntimeError
+    def initialize(message = nil, trace = nil)
+      $stderr.puts("#{self.class}: #{message}")
+      (trace || caller).take(5).each { |line| $stderr.puts("  #{line}") }
+      super(message)
+    end
   end
 end
 module Trakt
